@@ -1,10 +1,10 @@
-import * as functions from 'firebase-functions';
-const admin = require('firebase-admin');
+import * as functions from 'firebase-functions'
+const admin = require('firebase-admin')
 const stripe = require("stripe")("sk_test_XjjFP41NzYWM5KfH2MZzDnkU0075LBgZ2G")
 
 
-admin.initializeApp(functions.config().firebase);
-let db = admin.firestore();
+admin.initializeApp(functions.config().firebase)
+let db = admin.firestore()
 
 
 export const charge = functions.https.onRequest(async (req, res) => {
@@ -45,10 +45,10 @@ export const charge = functions.https.onRequest(async (req, res) => {
 })
 
 export const donate = functions.https.onRequest(async (req, res) => {
-  let docRef = db.collection('donations').doc();
+  let docRef = db.collection('donations').doc()
 
   docRef.set({
     url: 'test_url',
     donation_amount: 0.30,
-  });
+  })
 })
