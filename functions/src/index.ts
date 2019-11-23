@@ -10,6 +10,42 @@ function getSum(total: any, num: any) {
   return total + Math.round(num);
 }
 
+export const trending = functions.https.onRequest(async (req, res) => {
+  try {
+    const donations = await db.collection('donations').get();
+
+    var urlDonationTotal:any = {}
+
+    donations.forEach((doc: any) => {
+      const data = doc.data();
+
+      if (!(data.url in urlDonationTotal)) {
+        urlDonationTotal[data.url] = {
+          url: data.url,
+          amount: 0.0,
+          owner: doc.owner,
+        }
+      }
+
+      urlDonationTotal[data.url].amount += data.amount;
+    });
+
+    var urlList:any = [];
+
+    for (var key in urlDonationTotal) {
+      urlList.push(urlDonationTotal[key])
+    }
+
+    urlList.sort((a:any, b:any) => (a.amount > b.amount) ? -1 : 1)
+
+    res.status(200).json(urlList);
+  } catch (error) {
+    console.log('error getting latest donations: ' + error);
+    res.status(500).send('error getting latest donations');
+    return
+  }
+});
+
 export const calculateDonations = functions.https.onRequest(async (req, res) => {
   const { url } = req.body
 
@@ -21,8 +57,7 @@ export const calculateDonations = functions.https.onRequest(async (req, res) => 
   const amounts = querySnapshot.docs.map((doc: any) => doc.data().amount)
   const sum = amounts.reduce(getSum, 0)
   return res.status(200).json({sum: sum})
-})
-
+});
 
 export const charge = functions.https.onRequest(async (req, res) => {
   const currency = 'USD'
@@ -92,7 +127,7 @@ export const charge = functions.https.onRequest(async (req, res) => {
 
   // Send publishable key and PaymentIntent details to client
   res.status(200).json({})
-})
+});
 
 export const login = functions.https.onRequest(async (req, res) => {
   const { username, password } = req.body
