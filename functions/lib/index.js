@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const functions = require("firebase-functions");
+const admin = require('firebase-admin');
 // Copy the .env.example in the root into a .env file in this folder
 const stripe = require("stripe")("sk_test_XjjFP41NzYWM5KfH2MZzDnkU0075LBgZ2G");
 const calculateOrderAmount = () => {
@@ -57,5 +58,14 @@ exports.updatePaymentIntent = functions.https.onRequest(async (req, res) => {
         metadata: metadata
     });
     res.send({ amount: updatedPaymentIntent.amount });
+});
+admin.initializeApp(functions.config().firebase);
+let db = admin.firestore();
+exports.donate = functions.https.onRequest(async (req, res) => {
+    let docRef = db.collection('donations').doc();
+    docRef.set({
+        url: 'test_url',
+        donation_amount: 0.30,
+    });
 });
 //# sourceMappingURL=index.js.map

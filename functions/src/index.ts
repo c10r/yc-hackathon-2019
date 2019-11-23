@@ -1,4 +1,5 @@
-import * as functions from 'firebase-functions'
+import * as functions from 'firebase-functions';
+const admin = require('firebase-admin');
 
 // Copy the .env.example in the root into a .env file in this folder
 const stripe = require("stripe")("sk_test_XjjFP41NzYWM5KfH2MZzDnkU0075LBgZ2G")
@@ -64,4 +65,16 @@ export const updatePaymentIntent = functions.https.onRequest(async (req, res) =>
   })
 
   res.send({ amount: updatedPaymentIntent.amount })
+})
+
+admin.initializeApp(functions.config().firebase);
+let db = admin.firestore();
+
+export const donate = functions.https.onRequest(async (req, res) => {
+  let docRef = db.collection('donations').doc();
+
+  docRef.set({
+    url: 'test_url',
+    donation_amount: 0.30,
+  });
 })

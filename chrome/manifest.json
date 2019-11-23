@@ -8,10 +8,6 @@
       "16": "icon1.png"
     }
   },
-  "permissions": [
-    "storage",
-    "https://js.stripe.com/"
-  ],
-  "content_security_policy": "script-src 'self' https://js.stripe.com; object-src 'self'",
+  "permissions": ["storage"],
   "manifest_version": 2
 }
