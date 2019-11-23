@@ -119,7 +119,7 @@ var pay = async function(stripe, card) {
 
     if (result.error) {
         changeLoadingState(false);
-        var errorMsg = document.querySelector(".sr-field-error");
+        let errorMsg = document.querySelector(".sr-field-error");
         errorMsg.textContent = result.error.message;
         setTimeout(function() {
           errorMsg.textContent = "";
@@ -200,25 +200,49 @@ document.getElementById('close-sign-in-form').addEventListener('click', function
 document.getElementById('signin-link').addEventListener('click', function() {
   GLOBAL_STATE.showSignIn = true
   changeShowSignIn(true)
-  //try {
-  //  await fetch(`${URL_BASE}/charge`, {
-  //    method: "POST",
-  //    headers: {
-  //      "Content-Type": "application/json",
-  //      "Access-Control-Allow-Origin": "*"
-  //    },
-  //    body: JSON.stringify({
-  //      amount: amount*100,
-  //      payment_method
-  //    })
-  //  })
-  //} catch (error) {
-  //  console.error(`Could not log in: ${error}`)
-  //  GLOBAL_STATE.isLoggedIn = false
-  //  return
-  //}
+})
 
-  //GLOBAL_STATE.isLoggedIn = true
+document.getElementById('login-submit').addEventListener('click', async function() {
+  const username = document.getElementById('login-username').value
+  const password = document.getElementById('login-password').value
+
+  const errorMsg = document.getElementById("login-error")
+  if (!username) {
+    errorMsg.textContent = "Please enter a valid username."
+  }
+
+  if (!password && username) {
+    errorMsg.textContent = "Please enter a valid password."
+  }
+
+  if (!username || !password) {
+    setTimeout(function() {
+      errorMsg.textContent = "";
+    }, 4000);
+
+    return
+  }
+
+  try {
+    await fetch(`${URL_BASE}/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+      },
+      body: JSON.stringify({
+        username,
+        password,
+      })
+    })
+  } catch (error) {
+    console.error(`Could not log in: ${error}`)
+    GLOBAL_STATE.isLoggedIn = false
+    return
+  }
+
+  GLOBAL_STATE.isLoggedIn = true
+  changeLoggedInState(GLOBAL_STATE.isLoggedIn)
 })
 
 // // Show a spinner on payment submission
