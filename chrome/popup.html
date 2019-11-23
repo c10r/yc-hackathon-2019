@@ -18,7 +18,7 @@
     </style>
   </head>
   <body>
-    <div class="sr-root">
+    <div id="donation-page" class="sr-root">
         <div class="sr-main">
             <header class="sr-header">
                 <div class="header-titles"></div>
@@ -56,11 +56,45 @@
                 <div class="sr-field-error" id="card-errors" role="alert"></div>
             </div>
             <button id="submit"><div class="spinner hidden" id="spinner"></div><span id="button-text">Support</span></button>
+            <a id="signin-link" href="#">Sign in</a>
             </div>
             <div class="sr-payment-summary hidden completed-view">
                 <h1>Thanks for the Support!</h1>
             </div>
         </div>
+    </div>
+    <div id="sign-in-form" class="sr-root">
+      <div class="sr-main">
+        <h3>Sign In</h3>
+        <a id="close-sign-in-form" href="#" style="position:absolute; top:0; right:0;">
+          <img
+            src="https://img.icons8.com/windows/32/000000/close-window.png"
+            style="width:32px; height:32px">
+        </a>
+
+        <div class="sr-form-row">
+          <div class="sr-combo-inputs">
+            <div class="sr-combo-inputs-row">
+              <input
+                type="text"
+                id="message"
+                placeholder="Username"
+                class="sr-input"
+              />
+            </div>
+            <div class="sr-combo-inputs-row">
+              <input
+                type="password"
+                id="message"
+                placeholder="Password..."
+                class="sr-input"
+              />
+            </div>
+          </div>
+          <div class="sr-field-error" id="card-errors" role="alert"></div>
+        </div>
+        <button id="login-submit" style="width: 100%;"><span id="button-text">Login</span></button>
+      </div>
     </div>
   </body>
 </html>

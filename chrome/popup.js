@@ -1,6 +1,11 @@
 // A reference to Stripe.js
 var stripe;
 
+const GLOBAL_STATE = {
+  isLoggedIn: false,
+  showSignIn: false,
+}
+
 // fetch("/create-payment-intent", {
 //   method: "POST",
 //   headers: {
@@ -27,6 +32,8 @@ var stripe;
 //         handleCheckboxEvent(stripeData.id, evt.target.checked);
 //       });
 //   });
+
+const URL_BASE = `https://us-central1-credz-io.cloudfunctions.net/`
 
 // Set up Stripe.js and Elements to use in checkout form
 var setupElements = function() {
@@ -122,7 +129,7 @@ var pay = async function(stripe, card) {
 
     const payment_method = result.paymentMethod.id;
     
-    var result = await fetch("https://us-central1-credz-io.cloudfunctions.net/charge", {
+    var result = await fetch(`${URL_BASE}/charge`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -174,7 +181,7 @@ var pay = async function(stripe, card) {
 // /* ------- Post-payment helpers ------- */
 
 // /* Shows a success / error message when the payment is complete */
-var orderComplete = function() {
+const orderComplete = function() {
   document.querySelectorAll(".payment-view").forEach(function(view) {
       view.classList.add("hidden");
   });
@@ -183,10 +190,39 @@ var orderComplete = function() {
   });
 
   document.body.height = '300px';
-};
+}
+
+document.getElementById('close-sign-in-form').addEventListener('click', function() {
+  GLOBAL_STATE.showSignIn = false
+  changeShowSignIn(false)
+})
+
+document.getElementById('signin-link').addEventListener('click', function() {
+  GLOBAL_STATE.showSignIn = true
+  changeShowSignIn(true)
+  //try {
+  //  await fetch(`${URL_BASE}/charge`, {
+  //    method: "POST",
+  //    headers: {
+  //      "Content-Type": "application/json",
+  //      "Access-Control-Allow-Origin": "*"
+  //    },
+  //    body: JSON.stringify({
+  //      amount: amount*100,
+  //      payment_method
+  //    })
+  //  })
+  //} catch (error) {
+  //  console.error(`Could not log in: ${error}`)
+  //  GLOBAL_STATE.isLoggedIn = false
+  //  return
+  //}
+
+  //GLOBAL_STATE.isLoggedIn = true
+})
 
 // // Show a spinner on payment submission
-var changeLoadingState = function(isLoading) {
+const changeLoadingState = function(isLoading) {
   if (isLoading) {
     document.querySelector("button").disabled = true;
     document.querySelector("#spinner").classList.remove("hidden");
@@ -198,12 +234,20 @@ var changeLoadingState = function(isLoading) {
   }
 };
 
-// var updateTotal = function(newAmount) {
-//   document.querySelector(".order-amount").textContent =
-//     "$" + (newAmount / 100).toFixed(2);
-//   if (newAmount === 1400) {
-//     document.querySelector(".donation-text").classList.remove("hidden");
-//   } else {
-//     document.querySelector(".donation-text").classList.add("hidden");
-//   }
-// };
+const changeShowSignIn = function(showSignIn) {
+  const donationPage = document.getElementById('donation-page')
+  const loginPage = document.getElementById('sign-in-form')
+  if (showSignIn) {
+    donationPage.style.display = "none"
+    loginPage.style.display = "block"
+  } else {
+    donationPage.style.display = "block"
+    loginPage.style.display = "none"
+  }
+}
+
+const changeLoggedInState = function(isLoggedIn) {
+  // Render changes in the html based on login state
+}
+
+changeShowSignIn(GLOBAL_STATE.showSignIn)
