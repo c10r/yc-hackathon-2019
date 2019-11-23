@@ -244,6 +244,9 @@ const changeShowSignIn = function(showSignIn) {
 const changeLoggedInState = function(isLoggedIn) {
   if (isLoggedIn) {
     changeShowSignIn(false)
+    document.getElementById('signin-link').innerHTML = 'Sign out'
+  } else {
+    document.getElementById('signin-link').innerHTML = 'Sign in'
   }
 }
 
