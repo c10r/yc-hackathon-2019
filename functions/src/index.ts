@@ -49,13 +49,19 @@ export const trending = functions.https.onRequest(async (req, res) => {
 export const calculateDonations = functions.https.onRequest(async (req, res) => {
   const { url } = req.body
 
+  const trimmedUrl = url.replace(/\/$/, "");
+
+  console.log('url: ' + trimmedUrl)
+
   const querySnapshot = await db
     .collection('donations')
-    .where('url', '==', url)
+    .where('url', '==', trimmedUrl)
     .get()
 
   const amounts = querySnapshot.docs.map((doc: any) => doc.data().amount)
+  console.log("amounts: " + amounts)
   const sum = amounts.reduce(getSum, 0)
+  console.log("sum " + sum)
   return res.status(200).json({sum: sum})
 });
 
