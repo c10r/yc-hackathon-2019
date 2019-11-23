@@ -5,6 +5,17 @@ const admin = require('firebase-admin');
 const stripe = require("stripe")("sk_test_XjjFP41NzYWM5KfH2MZzDnkU0075LBgZ2G");
 admin.initializeApp(functions.config().firebase);
 let db = admin.firestore();
+exports.calculateDonations = functions.https.onRequest(async (req, res) => {
+    const { url } = req.body;
+    console.log(`req.body: ${Object.keys(req.body)}`);
+    console.log(`url: ${url}`);
+    const docs = await db
+        .collection('donations')
+        .where('url', '==', url)
+        .get();
+    const data = docs.map((doc) => doc.data());
+    return res.status(200).json(data);
+});
 exports.charge = functions.https.onRequest(async (req, res) => {
     const currency = 'USD';
     const { amount, payment_method, url, username, message } = req.body;
@@ -36,13 +47,6 @@ exports.charge = functions.https.onRequest(async (req, res) => {
         payment_intent: paymentIntent.id,
     });
     // Send publishable key and PaymentIntent details to client
-    res.status(200).send({});
-});
-exports.donate = functions.https.onRequest(async (req, res) => {
-    let docRef = db.collection('donations').doc();
-    docRef.set({
-        url: 'test_url',
-        donation_amount: 0.30,
-    });
+    res.status(200).json({});
 });
 //# sourceMappingURL=index.js.map

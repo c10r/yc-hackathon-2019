@@ -8,33 +8,6 @@ const GLOBAL_STATE = {
   username: '',
 }
 
-// fetch("/create-payment-intent", {
-//   method: "POST",
-//   headers: {
-//     "Content-Type": "application/json"
-//   },
-//   body: JSON.stringify(getPaymentIntentData())
-// })
-//   .then(function(result) {
-//     return result.json();
-//   })
-//   .then(function(data) {
-//     return setupElements(data);
-//   });
-//   .then(function(stripeData) {
-//     document.querySelector("#submit").addEventListener("click", function(evt) {
-//       evt.preventDefault();
-//       // Initiate payment
-//       pay(stripeData.stripe, stripeData.card, stripeData.clientSecret);
-//     });
-
-//     document
-//       .querySelector('input[type="checkbox"]')
-//       .addEventListener("change", function(evt) {
-//         handleCheckboxEvent(stripeData.id, evt.target.checked);
-//       });
-//   });
-
 const URL_BASE = `https://us-central1-credz-io.cloudfunctions.net/`
 
 // Set up Stripe.js and Elements to use in checkout form
@@ -79,10 +52,18 @@ new Promise((resolve, reject) => {
 });
 
 chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-    console.log(tabs);
-    document.querySelector("#page-title").textContent = tabs[0].title;
     GLOBAL_STATE.currentUrl = tabs[0].url
-});
+
+    const titleElement = document.querySelector("#page-title")
+
+    const TWEET_MATCH = /https:\/\/twitter.com\/(.*)\/status\/.*/
+    if (GLOBAL_STATE.currentUrl.match(TWEET_MATCH) !== null) {
+      const userName = GLOBAL_STATE.currentUrl.match(TWEET_MATCH)[1]
+      titleElement.textContent = `${userName}'s Tweet`
+    } else {
+      titleElement.textContent = tabs[0].title
+    }
+})
 
 document.querySelector("#amount").addEventListener("input", function(evt) {
     evt.preventDefault();
@@ -160,32 +141,6 @@ var pay = async function(stripe, card) {
         orderComplete();
     }
 };
-
-// var handleCheckboxEvent = function(id, isDonating) {
-//   changeLoadingState(true);
-
-//   const orderData = {
-//     isDonating: isDonating,
-//     email: document.getElementById("email").value,
-//     id: id
-//   };
-//   fetch("/update-payment-intent", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json"
-//     },
-//     body: JSON.stringify(orderData)
-//   })
-//     .then(function(response) {
-//       return response.json();
-//     })
-//     .then(function(data) {
-//       changeLoadingState(false);
-//       updateTotal(data.amount);
-//     });
-// };
-
-// /* ------- Post-payment helpers ------- */
 
 // /* Shows a success / error message when the payment is complete */
 const orderComplete = function() {

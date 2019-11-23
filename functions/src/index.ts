@@ -1,10 +1,22 @@
-import * as functions from 'firebase-functions';
-const admin = require('firebase-admin');
+import * as functions from 'firebase-functions'
+const admin = require('firebase-admin')
 const stripe = require("stripe")("sk_test_XjjFP41NzYWM5KfH2MZzDnkU0075LBgZ2G")
 
 
-admin.initializeApp(functions.config().firebase);
-let db = admin.firestore();
+admin.initializeApp(functions.config().firebase)
+let db = admin.firestore()
+
+
+export const calculateDonations = functions.https.onRequest(async (req, res) => {
+  const { url } = req.body
+
+  const docs = await db
+    .collection('donations')
+    .where('url', '==', url)
+    .get()
+  const data = docs.map((doc: any) => doc.data())
+  return res.status(200).json(data)
+})
 
 
 export const charge = functions.https.onRequest(async (req, res) => {
@@ -41,16 +53,7 @@ export const charge = functions.https.onRequest(async (req, res) => {
   })
 
   // Send publishable key and PaymentIntent details to client
-  res.status(200).send({})
-})
-
-export const donate = functions.https.onRequest(async (req, res) => {
-  let docRef = db.collection('donations').doc();
-
-  docRef.set({
-    url: 'test_url',
-    donation_amount: 0.30,
-  });
+  res.status(200).json({})
 })
 
 export const login = functions.https.onRequest(async (req, res) => {
@@ -89,4 +92,4 @@ export const login = functions.https.onRequest(async (req, res) => {
     res.status(500).send('Error signing in user')
     return
   }
-})
+});
