@@ -163,8 +163,15 @@ document.getElementById('close-sign-in-form').addEventListener('click', function
 })
 
 document.getElementById('signin-link').addEventListener('click', function() {
-  GLOBAL_STATE.showSignIn = true
-  changeShowSignIn(true)
+  if (!GLOBAL_STATE.isLoggedIn) {
+    GLOBAL_STATE.showSignIn = true
+    changeShowSignIn(true)
+  } else {
+    GLOBAL_STATE.isLoggedIn = false
+    GLOBAL_STATE.username = ''
+    GLOBAL_STATE.password = ''
+    GLOBAL_STATE.stripeCustomerId = ''
+  }
 })
 
 document.getElementById('login-submit').addEventListener('click', async function() {
@@ -244,6 +251,9 @@ const changeShowSignIn = function(showSignIn) {
 const changeLoggedInState = function(isLoggedIn) {
   if (isLoggedIn) {
     changeShowSignIn(false)
+    document.getElementById('signin-link').innerHTML = 'Sign out'
+  } else {
+    document.getElementById('signin-link').innerHTML = 'Sign in'
   }
 }
 
