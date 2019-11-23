@@ -1,8 +1,11 @@
 import * as functions from 'firebase-functions';
 const admin = require('firebase-admin');
-
-// Copy the .env.example in the root into a .env file in this folder
 const stripe = require("stripe")("sk_test_XjjFP41NzYWM5KfH2MZzDnkU0075LBgZ2G")
+
+
+admin.initializeApp(functions.config().firebase);
+let db = admin.firestore();
+
 
 export const charge = functions.https.onRequest(async (req, res) => {
   const currency = 'USD'
@@ -41,37 +44,6 @@ export const charge = functions.https.onRequest(async (req, res) => {
   // Send publishable key and PaymentIntent details to client
   res.status(200).send({})
 })
-
-// export const updatePaymentIntent = functions.https.onRequest(async (req, res) => {
-//   const { isDonating, id } = req.body
-//   const paymentIntent = await stripe.paymentIntents.retrieve(id)
-// 
-//   let metadata
-// 
-//   if (isDonating) {
-//     // Add metadata to track the amount being donated
-//     metadata = Object.assign(paymentIntent.metadata || {}, {
-//       donationAmount: 46,
-//       organizationAccountId: process.env.ORGANIZATION_ACCOUNT_ID
-//     })
-//   } else {
-//     metadata = Object.assign(paymentIntent.metadata || {}, {
-//       donationAmount: null,
-//       organizationAccountId: null
-//     })
-//   }
-// 
-//   // Update the PaymentIntent with the new amount and metedata
-//   const updatedPaymentIntent = await stripe.paymentIntents.update(id, {
-//     amount: calculateOrderAmount(),
-//     metadata: metadata
-//   })
-// 
-//   res.send({ amount: updatedPaymentIntent.amount })
-// })
-
-admin.initializeApp(functions.config().firebase);
-let db = admin.firestore();
 
 export const donate = functions.https.onRequest(async (req, res) => {
   let docRef = db.collection('donations').doc();
