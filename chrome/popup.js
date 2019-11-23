@@ -6,6 +6,8 @@ const GLOBAL_STATE = {
   showSignIn: false,
   currentUrl: '',
   username: '',
+  password: '',
+  stripeCustomerId: '',
 }
 
 const URL_BASE = `https://us-central1-credz-io.cloudfunctions.net/`
@@ -100,46 +102,47 @@ var pay = async function(stripe, card) {
         card: card,
     })
 
+  if (result.error) {
+      changeLoadingState(false);
+      let errorMsg = document.querySelector(".sr-field-error");
+      errorMsg.textContent = result.error.message;
+      setTimeout(function() {
+        errorMsg.textContent = "";
+      }, 4000);
+      return
+  }
 
-    if (result.error) {
-        changeLoadingState(false);
-        let errorMsg = document.querySelector(".sr-field-error");
-        errorMsg.textContent = result.error.message;
-        setTimeout(function() {
-          errorMsg.textContent = "";
-        }, 4000);
-        return
-    }
+  const payment_method = result.paymentMethod.id;
+  const message = document.getElementById('message').value
+  const username = !!GLOBAL_STATE.isLoggedIn ? GLOBAL_STATE.username : ''
 
-    const payment_method = result.paymentMethod.id;
-    const message = document.getElementById('message').value
-    
-    var result = await fetch(`${URL_BASE}/charge`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*"
-            },
-            body: JSON.stringify({
-                amount: amount*100,
-                payment_method,
-                url: GLOBAL_STATE.currentUrl,
-                username: GLOBAL_STATE.isLoggedIn ? GLOBAL_STATE.username : '',
-                message,
-            })
-    })
+  var result = await fetch(`${URL_BASE}/charge`, {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*"
+          },
+          body: JSON.stringify({
+              amount: amount*100,
+              payment_method,
+              url: GLOBAL_STATE.currentUrl,
+              username,
+              message,
+              customer_id: GLOBAL_STATE.stripeCustomerId,
+          })
+  })
 
-    changeLoadingState(false);
-    if (result.error) {
-        var errorMsg = document.querySelector(".sr-field-error");
-        errorMsg.textContent = result.error.message;
-        setTimeout(function() {
-          errorMsg.textContent = "";
-        }, 4000);
-        return
-    } else {
-        orderComplete();
-    }
+  changeLoadingState(false);
+  if (result.error) {
+      var errorMsg = document.querySelector(".sr-field-error");
+      errorMsg.textContent = result.error.message;
+      setTimeout(function() {
+        errorMsg.textContent = "";
+      }, 4000);
+      return
+  } else {
+      orderComplete();
+  }
 };
 
 // /* Shows a success / error message when the payment is complete */
@@ -185,8 +188,9 @@ document.getElementById('login-submit').addEventListener('click', async function
     return
   }
 
+  let loginResult
   try {
-    await fetch(`${URL_BASE}/login`, {
+    loginResult = await fetch(`${URL_BASE}/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -203,7 +207,12 @@ document.getElementById('login-submit').addEventListener('click', async function
     return
   }
 
+  const data = await loginResult.json()
+
   GLOBAL_STATE.isLoggedIn = true
+  GLOBAL_STATE.username = data.username
+  GLOBAL_STATE.password = data.password
+  GLOBAL_STATE.stripeCustomerId = data.stripe_customer
   changeLoggedInState(GLOBAL_STATE.isLoggedIn)
 })
 
@@ -233,7 +242,9 @@ const changeShowSignIn = function(showSignIn) {
 }
 
 const changeLoggedInState = function(isLoggedIn) {
-  // Render changes in the html based on login state
+  if (isLoggedIn) {
+    changeShowSignIn(false)
+  }
 }
 
 changeShowSignIn(GLOBAL_STATE.showSignIn)
