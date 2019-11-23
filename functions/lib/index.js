@@ -17,13 +17,15 @@ exports.calculateDonations = functions.https.onRequest(async (req, res) => {
 exports.charge = functions.https.onRequest(async (req, res) => {
     const currency = 'USD';
     const { amount, payment_method, url, username, message, customer_id } = req.body;
-    const docs = await db
+    const trimmedUrl = url.replace(/\/$/, "");
+    const querySnapshot = await db
         .collection('urls')
-        .where('url', '==', url)
+        .where('url', '==', trimmedUrl)
         .get();
     let transfer_data;
-    if (!docs.empty) {
-        const data = docs.map((doc) => doc.data());
+    if (!querySnapshot.empty) {
+        const data = querySnapshot.docs[0].data();
+        console.log('data: ' + data);
         transfer_data = {
             amount: Math.round(amount * 0.85),
             destination: data.stripe_account,
@@ -40,25 +42,23 @@ exports.charge = functions.https.onRequest(async (req, res) => {
     // Create a PaymentIntent with the order amount and currency
     let paymentIntent;
     try {
+        var request = {
+            amount,
+            currency,
+            payment_method,
+            confirm: true,
+            metadata: {
+                'url': trimmedUrl,
+                'message': message,
+            }
+        };
         if (customer_id) {
-            paymentIntent = await stripe.paymentIntents.create({
-                amount,
-                currency,
-                payment_method,
-                confirm: true,
-                customer: customer_id == '' ? null : customer_id,
-                transfer_data: transfer_data,
-            });
+            request.customer = customer_id == '' ? null : customer_id;
         }
-        else {
-            paymentIntent = await stripe.paymentIntents.create({
-                amount,
-                currency,
-                payment_method,
-                confirm: true,
-                transfer_data: transfer_data,
-            });
+        if (transfer_data) {
+            request.transfer_data = transfer_data;
         }
+        paymentIntent = await stripe.paymentIntents.create(request);
     }
     catch (error) {
         console.error(`Error creating payment intent: ${error}`);
@@ -67,7 +67,7 @@ exports.charge = functions.https.onRequest(async (req, res) => {
     }
     await db.collection('donations').doc().set({
         amount,
-        url,
+        trimmedUrl,
         username,
         message,
         ts: new Date(),
