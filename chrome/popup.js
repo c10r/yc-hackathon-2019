@@ -79,10 +79,18 @@ new Promise((resolve, reject) => {
 });
 
 chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-    console.log(tabs);
-    document.querySelector("#page-title").textContent = tabs[0].title;
     GLOBAL_STATE.currentUrl = tabs[0].url
-});
+
+    const titleElement = document.querySelector("#page-title")
+
+    const TWEET_MATCH = /https:\/\/twitter.com\/(.*)\/status\/.*/
+    if (GLOBAL_STATE.currentUrl.match(TWEET_MATCH) !== null) {
+      const userName = GLOBAL_STATE.currentUrl.match(TWEET_MATCH)[1]
+      titleElement.textContent = `${userName}'s Tweet`
+    } else {
+      titleElement.textContent = tabs[0].title
+    }
+})
 
 document.querySelector("#amount").addEventListener("input", function(evt) {
     evt.preventDefault();
