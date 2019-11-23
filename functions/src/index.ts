@@ -9,7 +9,7 @@ let db = admin.firestore();
 
 export const charge = functions.https.onRequest(async (req, res) => {
   const currency = 'USD'
-  const { amount, payment_method } = req.body
+  const { amount, payment_method, url, username, message } = req.body
 
   // Required if we want to transfer part of the payment as a donation
   // A transfer group is a unique ID that lets you associate transfers with the original payment
@@ -31,15 +31,14 @@ export const charge = functions.https.onRequest(async (req, res) => {
       return
   }
 
-  console.log(`Created payment intent ${paymentIntent.id}`)
-
-  try {
-    await stripe.paymentIntents.capture(paymentIntent.id)
-  } catch (error) {
-    console.error(`Could not capture payment intent: ${paymentIntent.id}: ${error}`)
-    res.status(500).send(`Unable to capture payment intent: ${paymentIntent.id}`)
-    return
-  }
+  await db.collection('donations').doc().set({
+    amount,
+    url,
+    username,
+    message,
+    ts: new Date(),
+    payment_intent: paymentIntent.id,
+  })
 
   // Send publishable key and PaymentIntent details to client
   res.status(200).send({})

@@ -4,6 +4,8 @@ var stripe;
 const GLOBAL_STATE = {
   isLoggedIn: false,
   showSignIn: false,
+  currentUrl: '',
+  username: '',
 }
 
 // fetch("/create-payment-intent", {
@@ -79,6 +81,7 @@ new Promise((resolve, reject) => {
 chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
     console.log(tabs);
     document.querySelector("#page-title").textContent = tabs[0].title;
+    GLOBAL_STATE.currentUrl = tabs[0].url
 });
 
 document.querySelector("#amount").addEventListener("input", function(evt) {
@@ -128,6 +131,7 @@ var pay = async function(stripe, card) {
     }
 
     const payment_method = result.paymentMethod.id;
+    const message = document.getElementById('message').value
     
     var result = await fetch(`${URL_BASE}/charge`, {
             method: "POST",
@@ -137,7 +141,10 @@ var pay = async function(stripe, card) {
             },
             body: JSON.stringify({
                 amount: amount*100,
-                payment_method
+                payment_method,
+                url: GLOBAL_STATE.currentUrl,
+                username: GLOBAL_STATE.isLoggedIn ? GLOBAL_STATE.username : '',
+                message,
             })
     })
 
