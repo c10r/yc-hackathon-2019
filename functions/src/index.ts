@@ -23,14 +23,16 @@ export const charge = functions.https.onRequest(async (req, res) => {
   const currency = 'USD'
   const { amount, payment_method, url, username, message, customer_id } = req.body
 
-  const docs = await db
+  const trimmedUrl = url.replace(/\/$/, "");
+
+  const querySnapshot = await db
     .collection('urls')
-    .where('url', '==', url)
+    .where('url', '==', trimmedUrl)
     .get()
 
   let transfer_data
-  if (!docs.empty) {
-    const data = docs.map((doc: any) => doc.data())
+  if (!querySnapshot.empty) {
+    const data = querySnapshot.docs[0].data()
     transfer_data = {
       amount: Math.round(amount * 0.85),
       destination: data.stripe_account,
@@ -48,24 +50,26 @@ export const charge = functions.https.onRequest(async (req, res) => {
   // Create a PaymentIntent with the order amount and currency
   let paymentIntent
   try {
-    if (customer_id) {
-      paymentIntent = await stripe.paymentIntents.create({
-        amount,
-        currency,
-        payment_method,
-        confirm: true,
-        customer: customer_id == '' ? null : customer_id,
-        transfer_data: transfer_data,
-      })
-    } else {
-      paymentIntent = await stripe.paymentIntents.create({
-        amount,
-        currency,
-        payment_method,
-        confirm: true,
-        transfer_data: transfer_data,
-      })
+    var request:any = {
+      amount,
+      currency,
+      payment_method,
+      confirm: true,
+      metadata: {
+        'url': trimmedUrl,
+        'message': message,
+      }
     }
+
+    if (customer_id) {
+      request.customer = customer_id == '' ? null : customer_id
+    }
+
+    if (transfer_data) {
+      request.transfer_data = transfer_data
+    }
+
+    paymentIntent = await stripe.paymentIntents.create(request)
   } catch (error) {
     console.error(`Error creating payment intent: ${error}`)
     res.status(500).send('Invalid payment intent creation')
@@ -74,7 +78,7 @@ export const charge = functions.https.onRequest(async (req, res) => {
 
   await db.collection('donations').doc().set({
     amount,
-    url,
+    trimmedUrl,
     username,
     message,
     ts: new Date(),
