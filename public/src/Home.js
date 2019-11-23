@@ -44,6 +44,7 @@ class DonationList extends React.Component {
                     <Card.Title>{donation.url}</Card.Title>
                     <Card.Text style={cardTextStyle}>
                         <p>🤑${donation.amount / 100.0}</p>
+                        <p>{donation.message}</p>
                         <p style={cardSubtitleTextStyle}>{new String(donation.ts.toDate())}</p>
                     </Card.Text>
                 </Card>
