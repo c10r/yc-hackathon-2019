@@ -1,0 +1,17 @@
+{
+  "name": "Credz.io Browser Extension",
+  "description": "Click browser action icon to give credit!",
+  "version": "1.3",
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon1.png"
+    }
+  },
+  "permissions": [
+    "storage",
+    "https://js.stripe.com/"
+  ],
+  "content_security_policy": "script-src 'self' https://js.stripe.com; object-src 'self'",
+  "manifest_version": 2
+}
