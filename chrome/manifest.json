@@ -8,6 +8,11 @@
       "16": "icon1.png"
     }
   },
-  "permissions": ["storage"],
+  "permissions": [
+    "storage",
+    "https://js.stripe.com/",
+    "https://us-central1-credz-io.cloudfunctions.net/"
+  ],
+  "content_security_policy": "script-src 'self' https://js.stripe.com; object-src 'self'",
   "manifest_version": 2
 }
