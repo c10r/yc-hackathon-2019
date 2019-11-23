@@ -7,15 +7,18 @@ const GLOBAL_STATE = {
   username: '',
   password: '',
   stripeCustomerId: '',
+  lastFour: '',
 }
 
 // Read it using the storage API
-chrome.storage.sync.get(['username', 'password', 'stripeCustomerId'], function(items) {
+chrome.storage.sync.get(['username', 'password', 'stripeCustomerId', 'lastFour'], function(items) {
   console.log('Settings retrieved', items);
   GLOBAL_STATE.username = items.username
   GLOBAL_STATE.password = items.password
   GLOBAL_STATE.stripeCustomerId = items.stripeCustomerId
+  GLOBAL_STATE.lastFour= items.lastFour
   changeLoggedInState(GLOBAL_STATE.stripeCustomerId && GLOBAL_STATE.username && GLOBAL_STATE.password)
+  showCardInputForm(GLOBAL_STATE.lastFour != '')
 })
 
 const URL_BASE = `https://us-central1-credz-io.cloudfunctions.net/`
@@ -178,9 +181,10 @@ document.getElementById('signin-link').addEventListener('click', function() {
     GLOBAL_STATE.username = ''
     GLOBAL_STATE.password = ''
     GLOBAL_STATE.stripeCustomerId = ''
+    GLOBAL_STATE.lastFour = ''
 
     chrome.storage.sync.set(
-      {'username': '', 'password': '', 'stripeCustomerId': ''},
+      {'username': '', 'password': '', 'stripeCustomerId': '', 'lastFour': ''},
       function() {
         console.log('Settings saved');
       });
@@ -271,6 +275,16 @@ const changeLoggedInState = function(isLoggedIn) {
     document.getElementById('signin-link').innerHTML = 'Sign out'
   } else {
     document.getElementById('signin-link').innerHTML = 'Sign in'
+  }
+}
+
+const showCardInputForm = function(hasCardAlready) {
+  if (hasCardAlready) {
+    document.getElementById('real-stripe-elements').style.display = 'none'
+    document.getElementById('fake-card-placeholder').style.display = 'block'
+  } else {
+    document.getElementById('fake-card-placeholder').style.display = 'none'
+    document.getElementById('real-stripe-elements').style.display = 'block'
   }
 }
 
