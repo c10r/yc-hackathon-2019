@@ -19,12 +19,10 @@ function App() {
             <Navbar.Brand href="/">Credz.io</Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Nav className="mr-auto" navbar>
-              <Nav.Link tag={Link} href="/trending">Trending</Nav.Link>
             </Nav>
           </Navbar>
           <div className="content">
             <Route path="/" exact component={Home}/>
-            <Route path="/trending" component={Trending}/>
           </div>
       </div>
     </Router>
