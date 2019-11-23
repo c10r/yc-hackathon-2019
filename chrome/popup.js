@@ -2,13 +2,21 @@
 var stripe;
 
 const GLOBAL_STATE = {
-  isLoggedIn: false,
   showSignIn: false,
   currentUrl: '',
   username: '',
   password: '',
   stripeCustomerId: '',
 }
+
+// Read it using the storage API
+chrome.storage.sync.get(['username', 'password', 'stripeCustomerId'], function(items) {
+  console.log('Settings retrieved', items);
+  GLOBAL_STATE.username = items.username
+  GLOBAL_STATE.password = items.password
+  GLOBAL_STATE.stripeCustomerId = items.stripeCustomerId
+  changeLoggedInState(GLOBAL_STATE.stripeCustomerId && GLOBAL_STATE.username && GLOBAL_STATE.password)
+})
 
 const URL_BASE = `https://us-central1-credz-io.cloudfunctions.net/`
 
@@ -114,7 +122,7 @@ var pay = async function(stripe, card) {
 
   const payment_method = result.paymentMethod.id;
   const message = document.getElementById('message').value
-  const username = !!GLOBAL_STATE.isLoggedIn ? GLOBAL_STATE.username : ''
+  const username = !!GLOBAL_STATE.username? GLOBAL_STATE.username : ''
 
   var result = await fetch(`${URL_BASE}/charge`, {
           method: "POST",
@@ -163,14 +171,20 @@ document.getElementById('close-sign-in-form').addEventListener('click', function
 })
 
 document.getElementById('signin-link').addEventListener('click', function() {
-  if (!GLOBAL_STATE.isLoggedIn) {
+  if (!GLOBAL_STATE.username || !GLOBAL_STATE.password || !GLOBAL_STATE.stripeCustomerId) {
     GLOBAL_STATE.showSignIn = true
     changeShowSignIn(true)
   } else {
-    GLOBAL_STATE.isLoggedIn = false
     GLOBAL_STATE.username = ''
     GLOBAL_STATE.password = ''
     GLOBAL_STATE.stripeCustomerId = ''
+
+    chrome.storage.sync.set(
+      {'username': '', 'password': '', 'stripeCustomerId': ''},
+      function() {
+        console.log('Settings saved');
+      });
+    changeLoggedInState(false)
   }
 })
 
@@ -210,17 +224,20 @@ document.getElementById('login-submit').addEventListener('click', async function
     })
   } catch (error) {
     console.error(`Could not log in: ${error}`)
-    GLOBAL_STATE.isLoggedIn = false
     return
   }
 
   const data = await loginResult.json()
 
-  GLOBAL_STATE.isLoggedIn = true
   GLOBAL_STATE.username = data.username
   GLOBAL_STATE.password = data.password
   GLOBAL_STATE.stripeCustomerId = data.stripe_customer
-  changeLoggedInState(GLOBAL_STATE.isLoggedIn)
+
+  chrome.storage.sync.set(
+      {'username': data.username, 'password': data.password, 'stripeCustomerId': data.stripe_customer},
+      function() { console.log('Settings saved'); });
+
+  changeLoggedInState(true)
 })
 
 // // Show a spinner on payment submission
