@@ -7,6 +7,18 @@ admin.initializeApp(functions.config().firebase)
 let db = admin.firestore()
 
 
+export const calculateDonations = functions.https.onRequest(async (req, res) => {
+  const { url } = req.body
+
+  const docs = await db
+    .collection('donations')
+    .where('url', '==', url)
+    .get()
+  const data = docs.map((doc: any) => doc.data())
+  return res.status(200).json(data)
+})
+
+
 export const charge = functions.https.onRequest(async (req, res) => {
   const currency = 'USD'
   const { amount, payment_method, url, username, message } = req.body
@@ -41,14 +53,5 @@ export const charge = functions.https.onRequest(async (req, res) => {
   })
 
   // Send publishable key and PaymentIntent details to client
-  res.status(200).send({})
-})
-
-export const donate = functions.https.onRequest(async (req, res) => {
-  let docRef = db.collection('donations').doc()
-
-  docRef.set({
-    url: 'test_url',
-    donation_amount: 0.30,
-  })
+  res.status(200).json({})
 })
