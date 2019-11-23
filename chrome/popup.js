@@ -18,7 +18,7 @@ chrome.storage.sync.get(['username', 'password', 'stripeCustomerId', 'lastFour']
   GLOBAL_STATE.stripeCustomerId = items.stripeCustomerId
   GLOBAL_STATE.lastFour= items.lastFour
   changeLoggedInState(GLOBAL_STATE.stripeCustomerId && GLOBAL_STATE.username && GLOBAL_STATE.password)
-  showCardInputForm(GLOBAL_STATE.stripeCustomerId != '')
+  showCardInputForm(GLOBAL_STATE.lastFour != '')
 })
 
 const URL_BASE = `https://us-central1-credz-io.cloudfunctions.net/`
@@ -122,7 +122,7 @@ var pay = async function(stripe, card) {
   amount = document.querySelector("#amount").value;
 
   let payment_method
-  if (GLOBAL_STATE.stripeCustomerId == '') {
+  if (GLOBAL_STATE.lastFour == '') {
     // Initiate the payment.
     // If authentication is required, confirmCardPayment will display a modal
     var result = await stripe
@@ -140,6 +140,12 @@ var pay = async function(stripe, card) {
         }, 4000);
         return
     }
+    GLOBAL_STATE.lastFour = 'xxxx'
+    chrome.storage.sync.set(
+      {'lastFour': 'xxxx'},
+      function() {
+        showCardInputForm(true)
+      });
     payment_method = result.paymentMethod.id;
   } else {
     card.destroy()
@@ -297,7 +303,6 @@ const changeShowSignIn = function(showSignIn) {
 }
 
 const changeLoggedInState = function(isLoggedIn) {
-  showCardInputForm(isLoggedIn)
   if (isLoggedIn) {
     changeShowSignIn(false)
     document.getElementById('signin-link').innerHTML = 'Sign out'
