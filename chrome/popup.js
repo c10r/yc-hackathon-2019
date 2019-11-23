@@ -18,7 +18,7 @@ chrome.storage.sync.get(['username', 'password', 'stripeCustomerId', 'lastFour']
   GLOBAL_STATE.stripeCustomerId = items.stripeCustomerId
   GLOBAL_STATE.lastFour= items.lastFour
   changeLoggedInState(GLOBAL_STATE.stripeCustomerId && GLOBAL_STATE.username && GLOBAL_STATE.password)
-  showCardInputForm(GLOBAL_STATE.lastFour != '')
+  showCardInputForm(GLOBAL_STATE.stripeCustomerId != '')
 })
 
 const URL_BASE = `https://us-central1-credz-io.cloudfunctions.net/`
@@ -84,7 +84,7 @@ var setupElements = function() {
 };
 
 new Promise((resolve, reject) => {
-    resolve(setupElements());
+  resolve(setupElements());
 })
 .then(function(stripeData) {
     document.querySelector("#submit").addEventListener("click", function(evt) {
@@ -121,25 +121,30 @@ var pay = async function(stripe, card) {
 
   amount = document.querySelector("#amount").value;
 
-  // Initiate the payment.
-  // If authentication is required, confirmCardPayment will display a modal
-  var result = await stripe
-    .createPaymentMethod({
-        type: 'card',
-        card: card,
-    })
+  let payment_method
+  if (GLOBAL_STATE.stripeCustomerId == '') {
+    // Initiate the payment.
+    // If authentication is required, confirmCardPayment will display a modal
+    var result = await stripe
+      .createPaymentMethod({
+          type: 'card',
+          card: card,
+      })
 
-  if (result.error) {
-      changeLoadingState(false);
-      let errorMsg = document.querySelector(".sr-field-error");
-      errorMsg.textContent = result.error.message;
-      setTimeout(function() {
-        errorMsg.textContent = "";
-      }, 4000);
-      return
+    if (result.error) {
+        changeLoadingState(false);
+        let errorMsg = document.querySelector(".sr-field-error");
+        errorMsg.textContent = result.error.message;
+        setTimeout(function() {
+          errorMsg.textContent = "";
+        }, 4000);
+        return
+    }
+    payment_method = result.paymentMethod.id;
+  } else {
+    card.destroy()
   }
 
-  const payment_method = result.paymentMethod.id;
   const message = document.getElementById('message').value
   const username = !!GLOBAL_STATE.username? GLOBAL_STATE.username : ''
 
@@ -149,9 +154,15 @@ var pay = async function(stripe, card) {
               "Content-Type": "application/json",
               "Access-Control-Allow-Origin": "*"
           },
-          body: JSON.stringify({
+          body: JSON.stringify(GLOBAL_STATE.stripeCustomerId == '' ? {
               amount: amount*100,
               payment_method,
+              url: GLOBAL_STATE.currentUrl,
+              username,
+              message,
+              customer_id: GLOBAL_STATE.stripeCustomerId,
+          } : {
+              amount: amount*100,
               url: GLOBAL_STATE.currentUrl,
               username,
               message,
@@ -286,6 +297,7 @@ const changeShowSignIn = function(showSignIn) {
 }
 
 const changeLoggedInState = function(isLoggedIn) {
+  showCardInputForm(isLoggedIn)
   if (isLoggedIn) {
     changeShowSignIn(false)
     document.getElementById('signin-link').innerHTML = 'Sign out'

@@ -1,4 +1,5 @@
 import React from 'react';
+import Card from 'react-bootstrap/Card';
 
 const firebase = require("firebase");
 // Required for side-effects
@@ -22,11 +23,31 @@ firebase.analytics();
 
 const db = firebase.firestore()
 
+const cardStyle = {
+    margin: '40px',
+    border: '1px solid gray'
+};
+
+const cardTextStyle = {
+    fontSize: '20px',
+};
+
+const cardSubtitleTextStyle = {
+    fontSize: '10px',
+};
 
 class DonationList extends React.Component {
     render() {
         const items = this.props.donations.map((donation, index) => {
-            return (<li key={index}><p>${donation.amount / 100.0}, {new String(donation.ts.toDate())}, {donation.url}</p></li>)
+            return (
+                <Card style={cardStyle}>
+                    <Card.Title>{donation.url}</Card.Title>
+                    <Card.Text style={cardTextStyle}>
+                        <p>🤑${donation.amount / 100.0}</p>
+                        <p style={cardSubtitleTextStyle}>{new String(donation.ts.toDate())}</p>
+                    </Card.Text>
+                </Card>
+            )
         })
         return (
             <ul>{items}</ul>
