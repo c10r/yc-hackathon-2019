@@ -62,8 +62,7 @@
   .sr-payment-summary {
     margin-bottom: 20px;
   }
-  .sr-main,
-  .sr-content {
+  .sr-main {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -72,9 +71,6 @@
   }
   .sr-main {
     width: var(--form-width);
-  }
-  .sr-content {
-    padding-left: 48px;
   }
   .sr-header__logo {
     background-image: var(--logo-image);
@@ -335,10 +331,6 @@
   
     .sr-payment-summary {
       text-align: center;
-    }
-  
-    .sr-content {
-      display: none;
     }
   
     .sr-main {
