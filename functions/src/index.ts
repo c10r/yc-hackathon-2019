@@ -118,7 +118,7 @@ export const charge = functions.https.onRequest(async (req, res) => {
 
   await db.collection('donations').doc().set({
     amount,
-    trimmedUrl,
+    url: trimmedUrl,
     username,
     message,
     ts: new Date(),
