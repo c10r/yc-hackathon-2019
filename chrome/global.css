@@ -350,6 +350,11 @@
   .sr-card-element {
     padding-top: 12px;
   }
+
+   /* Sign Up / Login padding */
+  .sr-signin-link {
+    padding-top: 100px;
+  }
   
   /* Responsiveness */
   @media (max-width: 720px) {
