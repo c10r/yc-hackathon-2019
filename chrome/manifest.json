@@ -10,6 +10,7 @@
   },
   "permissions": [
     "storage",
+    "tabs",
     "https://js.stripe.com/",
     "https://us-central1-credz-io.cloudfunctions.net/"
   ],

@@ -7,8 +7,8 @@
     <script src="popup.js" defer></script>
     <style>
       body {
-        width:780px;
-        height:580px;
+        width:350px;
+        height:300px;
       }
       button {
         height: 30px;
@@ -21,8 +21,10 @@
     <div class="sr-root">
         <div class="sr-main">
             <header class="sr-header">
-                <h4 id="page-title"></h4>
-                <div class="sr-header__logo"></div>
+                <div class="header-titles"></div>
+                    <h3 id="support-title">Support </h3>
+                    <h3 id="page-title"></h3>
+                </div>
             </header>
             <div class="sr-payment-summary payment-view">
                 <span class="sr-money-currency">$</span>
@@ -38,9 +40,6 @@
             </div>        
             <div class="sr-payment-form payment-view">
             <div class="sr-form-row">
-                <label for="card-element">
-                Payment details
-                </label>
                 <div class="sr-combo-inputs">
                     <div class="sr-combo-inputs-row">
                         <input
@@ -54,29 +53,13 @@
                         <div class="sr-input sr-card-element" id="card-element"></div>
                     </div>
                 </div>
-                <div class="sr-form-row">
-                <label class="sr-checkbox-label"><input type="checkbox" name="donate"><span class="sr-checkbox-check"></span> Round up and donate to <a href="#">Photos 4 Kidz</a></a></label>
-                </div>
                 <div class="sr-field-error" id="card-errors" role="alert"></div>
             </div>
-            <button id="submit"><div class="spinner hidden" id="spinner"></div><span id="button-text">Pay</span></button>
-            <div class="sr-legal-text">
-                You will be charged $13.54 for the order<span class="donation-text hidden"> and $0.46 for the donation. It will appear as one payment of $14.00</span>.
-            </div>
+            <button id="submit"><div class="spinner hidden" id="spinner"></div><span id="button-text">Support</span></button>
             </div>
             <div class="sr-payment-summary hidden completed-view">
-            <h1>Payment succeeded</h1>
-            <h4>
-                View PaymentIntent response:</a>
-            </h4>
+                <h1>Thanks for the Support!</h1>
             </div>
-            <div class="sr-section hidden completed-view">
-            <div class="sr-callout">
-                <pre>
-
-                </pre>
-            </div>
-            </div>  
         </div>
     </div>
   </body>

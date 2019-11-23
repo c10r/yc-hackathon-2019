@@ -200,13 +200,40 @@
   }
 
   .payment-view > .sr-money-currency {
-      font-size: 80px;
+      font-size: 5em;
+  }
+
+  .header-titles {
+    clear: both;
+  }
+
+  #support-title {
+    display: inline;
+    color: var(--gray-light);
+  }
+
+  #page-title {
+    display: inline;
+    color: var(--gray-dark);
   }
 
   .sr-money-input {
-    font-size: 80px;
+    font-size: 5em;
     border: none;
     outline: none;
+    width:  80%;
+    -webkit-appearance: none; 
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+      /* display: none; <- Crashes Chrome on hover */
+      -webkit-appearance: none;
+      margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+  }
+
+  input[type=number] {
+      -moz-appearance:textfield; /* Firefox */
   }
   
   /* Combo inputs */
@@ -269,8 +296,6 @@
     border-radius: var(--radius);
     color: white;
     border: 0;
-    padding: 12px 16px;
-    margin-top: 16px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -340,7 +365,11 @@
     }
   
     .sr-payment-summary {
-      text-align: center;
+      text-align: left;
+    }
+    
+    .sr-payment-summary > span {
+      text-align: left;
     }
   
     .sr-main {

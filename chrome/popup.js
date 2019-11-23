@@ -67,10 +67,29 @@ new Promise((resolve, reject) => {
         // Initiate payment
         pay(stripeData.stripe, stripeData.card);
     });
-})
+});
 
 chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-    document.querySelector("#page-title").textContent =  'Credit ' + tabs[0].title;
+    console.log(tabs);
+    document.querySelector("#page-title").textContent = tabs[0].title;
+});
+
+document.querySelector("#amount").addEventListener("input", function(evt) {
+    evt.preventDefault();
+    amount_field = document.querySelector("#amount");
+    
+    val = amount_field.value;
+    splits = val.split(".");
+
+    if (splits.length > 1) {
+        decimal = splits[1];
+        if (decimal.length > 2) {
+            decimal = decimal.slice(0, 1) + decimal.charAt(decimal.length-1);
+            val = splits[0] + "." + decimal;
+        }
+    }
+
+    amount_field.value = val;
 });
 
 /*
@@ -84,7 +103,7 @@ var pay = async function(stripe, card) {
 
   // Initiate the payment.
   // If authentication is required, confirmCardPayment will display a modal
-  const result = await stripe
+  var result = await stripe
     .createPaymentMethod({
         type: 'card',
         card: card,
@@ -103,7 +122,7 @@ var pay = async function(stripe, card) {
 
     const payment_method = result.paymentMethod.id;
     
-    fetch("https://us-central1-credz-io.cloudfunctions.net/charge", {
+    var result = await fetch("https://us-central1-credz-io.cloudfunctions.net/charge", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -114,6 +133,18 @@ var pay = async function(stripe, card) {
                 payment_method
             })
     })
+
+    changeLoadingState(false);
+    if (result.error) {
+        var errorMsg = document.querySelector(".sr-field-error");
+        errorMsg.textContent = result.error.message;
+        setTimeout(function() {
+          errorMsg.textContent = "";
+        }, 4000);
+        return
+    } else {
+        orderComplete();
+    }
 };
 
 // var handleCheckboxEvent = function(id, isDonating) {
@@ -143,19 +174,16 @@ var pay = async function(stripe, card) {
 // /* ------- Post-payment helpers ------- */
 
 // /* Shows a success / error message when the payment is complete */
-// var orderComplete = function(clientSecret) {
-//   stripe.retrievePaymentIntent(clientSecret).then(function(result) {
-//     var paymentIntent = result.paymentIntent;
-//     var paymentIntentJson = JSON.stringify(paymentIntent, null, 2);
-//     document.querySelectorAll(".payment-view").forEach(function(view) {
-//       view.classList.add("hidden");
-//     });
-//     document.querySelectorAll(".completed-view").forEach(function(view) {
-//       view.classList.remove("hidden");
-//     });
-//     document.querySelector("pre").textContent = paymentIntentJson;
-//   });
-// };
+var orderComplete = function() {
+  document.querySelectorAll(".payment-view").forEach(function(view) {
+      view.classList.add("hidden");
+  });
+  document.querySelectorAll(".completed-view").forEach(function(view) {
+      view.classList.remove("hidden");
+  });
+
+  document.body.height = '300px';
+};
 
 // // Show a spinner on payment submission
 var changeLoadingState = function(isLoading) {
