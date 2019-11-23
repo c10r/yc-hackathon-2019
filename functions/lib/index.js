@@ -37,7 +37,9 @@ exports.charge = functions.https.onRequest(async (req, res) => {
         return;
     }
     try {
-        await stripe.customers.update(customer_id, { source: payment_method });
+        if (username != '' && customer_id != '') {
+            await stripe.paymentMethods.attach(payment_method, { customer: customer_id });
+        }
     }
     catch (error) {
         console.error(`Could not save Stripe customer payment method: ${error}`);
