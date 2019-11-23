@@ -8,33 +8,6 @@ const GLOBAL_STATE = {
   username: '',
 }
 
-// fetch("/create-payment-intent", {
-//   method: "POST",
-//   headers: {
-//     "Content-Type": "application/json"
-//   },
-//   body: JSON.stringify(getPaymentIntentData())
-// })
-//   .then(function(result) {
-//     return result.json();
-//   })
-//   .then(function(data) {
-//     return setupElements(data);
-//   });
-//   .then(function(stripeData) {
-//     document.querySelector("#submit").addEventListener("click", function(evt) {
-//       evt.preventDefault();
-//       // Initiate payment
-//       pay(stripeData.stripe, stripeData.card, stripeData.clientSecret);
-//     });
-
-//     document
-//       .querySelector('input[type="checkbox"]')
-//       .addEventListener("change", function(evt) {
-//         handleCheckboxEvent(stripeData.id, evt.target.checked);
-//       });
-//   });
-
 const URL_BASE = `https://us-central1-credz-io.cloudfunctions.net/`
 
 // Set up Stripe.js and Elements to use in checkout form
@@ -168,32 +141,6 @@ var pay = async function(stripe, card) {
         orderComplete();
     }
 };
-
-// var handleCheckboxEvent = function(id, isDonating) {
-//   changeLoadingState(true);
-
-//   const orderData = {
-//     isDonating: isDonating,
-//     email: document.getElementById("email").value,
-//     id: id
-//   };
-//   fetch("/update-payment-intent", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json"
-//     },
-//     body: JSON.stringify(orderData)
-//   })
-//     .then(function(response) {
-//       return response.json();
-//     })
-//     .then(function(data) {
-//       changeLoadingState(false);
-//       updateTotal(data.amount);
-//     });
-// };
-
-// /* ------- Post-payment helpers ------- */
 
 // /* Shows a success / error message when the payment is complete */
 const orderComplete = function() {
