@@ -40,14 +40,25 @@ exports.charge = functions.https.onRequest(async (req, res) => {
     // Create a PaymentIntent with the order amount and currency
     let paymentIntent;
     try {
-        paymentIntent = await stripe.paymentIntents.create({
-            amount,
-            currency,
-            payment_method,
-            confirm: true,
-            customer: customer_id == '' ? null : customer_id,
-            transfer_data: transfer_data,
-        });
+        if (customer_id) {
+            paymentIntent = await stripe.paymentIntents.create({
+                amount,
+                currency,
+                payment_method,
+                confirm: true,
+                customer: customer_id == '' ? null : customer_id,
+                transfer_data: transfer_data,
+            });
+        }
+        else {
+            paymentIntent = await stripe.paymentIntents.create({
+                amount,
+                currency,
+                payment_method,
+                confirm: true,
+                transfer_data: transfer_data,
+            });
+        }
     }
     catch (error) {
         console.error(`Error creating payment intent: ${error}`);
