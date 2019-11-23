@@ -7,18 +7,51 @@ const GLOBAL_STATE = {
   username: '',
   password: '',
   stripeCustomerId: '',
+  lastFour: '',
 }
 
 // Read it using the storage API
-chrome.storage.sync.get(['username', 'password', 'stripeCustomerId'], function(items) {
+chrome.storage.sync.get(['username', 'password', 'stripeCustomerId', 'lastFour'], function(items) {
   console.log('Settings retrieved', items);
   GLOBAL_STATE.username = items.username
   GLOBAL_STATE.password = items.password
   GLOBAL_STATE.stripeCustomerId = items.stripeCustomerId
+  GLOBAL_STATE.lastFour= items.lastFour
   changeLoggedInState(GLOBAL_STATE.stripeCustomerId && GLOBAL_STATE.username && GLOBAL_STATE.password)
+  showCardInputForm(GLOBAL_STATE.lastFour != '')
 })
 
 const URL_BASE = `https://us-central1-credz-io.cloudfunctions.net/`
+
+chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+  GLOBAL_STATE.currentUrl = tabs[0].url
+
+  const titleElement = document.querySelector("#page-title")
+
+  const TWEET_MATCH = /https:\/\/twitter.com\/(.*)\/status\/.*/
+  if (GLOBAL_STATE.currentUrl.match(TWEET_MATCH) !== null) {
+    const userName = GLOBAL_STATE.currentUrl.match(TWEET_MATCH)[1]
+    titleElement.textContent = `${userName}'s Tweet`
+  } else {
+    titleElement.textContent = tabs[0].title
+  }
+  getDonations()
+})
+
+async function getDonations() {
+  var donationsSum = await fetch(`${URL_BASE}calculateDonations`, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+    },
+    body: JSON.stringify({
+        url: GLOBAL_STATE.currentUrl,
+    })
+  })
+  const data = await donationsSum.json()
+  document.getElementById('donations-view').innerHTML = "&#x1F31F Donated so far: $" + (data.sum / 100).toFixed(2)
+}
 
 // Set up Stripe.js and Elements to use in checkout form
 var setupElements = function() {
@@ -60,20 +93,6 @@ new Promise((resolve, reject) => {
         pay(stripeData.stripe, stripeData.card);
     });
 });
-
-chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-    GLOBAL_STATE.currentUrl = tabs[0].url
-
-    const titleElement = document.querySelector("#page-title")
-
-    const TWEET_MATCH = /https:\/\/twitter.com\/(.*)\/status\/.*/
-    if (GLOBAL_STATE.currentUrl.match(TWEET_MATCH) !== null) {
-      const userName = GLOBAL_STATE.currentUrl.match(TWEET_MATCH)[1]
-      titleElement.textContent = `${userName}'s Tweet`
-    } else {
-      titleElement.textContent = tabs[0].title
-    }
-})
 
 document.querySelector("#amount").addEventListener("input", function(evt) {
     evt.preventDefault();
@@ -178,9 +197,10 @@ document.getElementById('signin-link').addEventListener('click', function() {
     GLOBAL_STATE.username = ''
     GLOBAL_STATE.password = ''
     GLOBAL_STATE.stripeCustomerId = ''
+    GLOBAL_STATE.lastFour = ''
 
     chrome.storage.sync.set(
-      {'username': '', 'password': '', 'stripeCustomerId': ''},
+      {'username': '', 'password': '', 'stripeCustomerId': '', 'lastFour': ''},
       function() {
         console.log('Settings saved');
       });
@@ -270,7 +290,17 @@ const changeLoggedInState = function(isLoggedIn) {
     changeShowSignIn(false)
     document.getElementById('signin-link').innerHTML = 'Sign out'
   } else {
-    document.getElementById('signin-link').innerHTML = 'Sign in'
+    document.getElementById('signin-link').innerHTML = 'Sign up / Login'
+  }
+}
+
+const showCardInputForm = function(hasCardAlready) {
+  if (hasCardAlready) {
+    document.getElementById('real-stripe-elements').style.display = 'none'
+    document.getElementById('fake-card-placeholder').style.display = 'block'
+  } else {
+    document.getElementById('fake-card-placeholder').style.display = 'none'
+    document.getElementById('real-stripe-elements').style.display = 'block'
   }
 }
 
