@@ -25,8 +25,8 @@ const db = firebase.firestore()
 
 class DonationList extends React.Component {
     render() {
-        const items = this.props.donations.map((index, donation) => {
-            return (<li key={index}>`${donation.amount}, ${donation.ts}, ${donation.url}`</li>)
+        const items = this.props.donations.map((donation, index) => {
+            return (<li key={index}><p>${donation.amount / 100.0}, {new String(donation.ts.toDate())}, {donation.url}</p></li>)
         })
         return (
             <ul>{items}</ul>
@@ -44,10 +44,12 @@ class Home extends React.Component {
     }
 
     getLatestDonations() {
-        db.collection('donations').get().then(querySnapshot => {
-            const data = querySnapshot.docs.map(doc => doc.data())
-            this.setState({ donations: data })
-        })
+        db.collection('donations')
+            .orderBy('ts', 'desc')
+            .onSnapshot(querySnapshot => {
+                const data = querySnapshot.docs.map(doc => doc.data())
+                this.setState({ donations: data })
+            })
     }
 
     render() {
