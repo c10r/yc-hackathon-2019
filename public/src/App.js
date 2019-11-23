@@ -23,7 +23,7 @@ function App() {
             </Nav>
           </Navbar>
           <div className="content">
-            <Route path="/" component={Home}/>
+            <Route path="/" exact component={Home}/>
             <Route path="/trending" component={Trending}/>
           </div>
       </div>
