@@ -20,6 +20,36 @@ chrome.storage.sync.get(['username', 'password', 'stripeCustomerId'], function(i
 
 const URL_BASE = `https://us-central1-credz-io.cloudfunctions.net/`
 
+chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+  GLOBAL_STATE.currentUrl = tabs[0].url
+
+  const titleElement = document.querySelector("#page-title")
+
+  const TWEET_MATCH = /https:\/\/twitter.com\/(.*)\/status\/.*/
+  if (GLOBAL_STATE.currentUrl.match(TWEET_MATCH) !== null) {
+    const userName = GLOBAL_STATE.currentUrl.match(TWEET_MATCH)[1]
+    titleElement.textContent = `${userName}'s Tweet`
+  } else {
+    titleElement.textContent = tabs[0].title
+  }
+  getDonations()
+})
+
+async function getDonations() {
+  var donationsSum = await fetch(`${URL_BASE}calculateDonations`, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+    },
+    body: JSON.stringify({
+        url: GLOBAL_STATE.currentUrl,
+    })
+  })
+  const data = await donationsSum.json()
+  document.getElementById('donations-view').innerHTML = "&#x1F31F Donated so far: $" + (data.sum / 100).toFixed(2)
+}
+
 // Set up Stripe.js and Elements to use in checkout form
 var setupElements = function() {
   stripe = Stripe('pk_test_wPYxwhf0vo7zVw1CIHaAzOkl00gZEQBhgx');
@@ -60,20 +90,6 @@ new Promise((resolve, reject) => {
         pay(stripeData.stripe, stripeData.card);
     });
 });
-
-chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-    GLOBAL_STATE.currentUrl = tabs[0].url
-
-    const titleElement = document.querySelector("#page-title")
-
-    const TWEET_MATCH = /https:\/\/twitter.com\/(.*)\/status\/.*/
-    if (GLOBAL_STATE.currentUrl.match(TWEET_MATCH) !== null) {
-      const userName = GLOBAL_STATE.currentUrl.match(TWEET_MATCH)[1]
-      titleElement.textContent = `${userName}'s Tweet`
-    } else {
-      titleElement.textContent = tabs[0].title
-    }
-})
 
 document.querySelector("#amount").addEventListener("input", function(evt) {
     evt.preventDefault();
