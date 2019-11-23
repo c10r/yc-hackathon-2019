@@ -17,25 +17,17 @@ exports.calculateDonations = functions.https.onRequest(async (req, res) => {
 exports.charge = functions.https.onRequest(async (req, res) => {
     const currency = 'USD';
     const { amount, payment_method, url, username, message, customer_id } = req.body;
-    // Required if we want to transfer part of the payment as a donation
-    // A transfer group is a unique ID that lets you associate transfers with the original payment
-    const transfer_group = `group_${Math.floor(Math.random() * 10)}`;
-    // Create a PaymentIntent with the order amount and currency
-    let paymentIntent;
-    try {
-        paymentIntent = await stripe.paymentIntents.create({
-            amount,
-            currency,
-            transfer_group,
-            payment_method,
-            confirm: true,
-            customer: customer_id == '' ? null : customer_id,
-        });
-    }
-    catch (error) {
-        console.error(`Error creating payment intent: ${error}`);
-        res.status(500).send('Invalid payment intent creation');
-        return;
+    const docs = await db
+        .collection('urls')
+        .where('url', '==', url)
+        .get();
+    let transfer_data;
+    if (!docs.empty) {
+        const data = docs.map((doc) => doc.data());
+        transfer_data = {
+            amount: Math.round(amount * 0.85),
+            destination: data.stripe_account,
+        };
     }
     try {
         if (username != '' && customer_id != '') {
@@ -44,6 +36,23 @@ exports.charge = functions.https.onRequest(async (req, res) => {
     }
     catch (error) {
         console.error(`Could not save Stripe customer payment method: ${error}`);
+    }
+    // Create a PaymentIntent with the order amount and currency
+    let paymentIntent;
+    try {
+        paymentIntent = await stripe.paymentIntents.create({
+            amount,
+            currency,
+            payment_method,
+            confirm: true,
+            customer: customer_id == '' ? null : customer_id,
+            transfer_data: transfer_data,
+        });
+    }
+    catch (error) {
+        console.error(`Error creating payment intent: ${error}`);
+        res.status(500).send('Invalid payment intent creation');
+        return;
     }
     await db.collection('donations').doc().set({
         amount,

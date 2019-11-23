@@ -24,9 +24,9 @@ export const charge = functions.https.onRequest(async (req, res) => {
   const { amount, payment_method, url, username, message, customer_id } = req.body
 
   const docs = await db
-  .collection('urls')
-  .where('url', '==', url)
-  .get()
+    .collection('urls')
+    .where('url', '==', url)
+    .get()
 
   let transfer_data
   if (!docs.empty) {
@@ -35,6 +35,14 @@ export const charge = functions.https.onRequest(async (req, res) => {
       amount: Math.round(amount * 0.85),
       destination: data.stripe_account,
     }
+  }
+
+  try {
+    if (username != '' && customer_id != '') {
+      await stripe.paymentMethods.attach(payment_method, { customer: customer_id })
+    }
+  } catch (error) {
+    console.error(`Could not save Stripe customer payment method: ${error}`)
   }
 
   // Create a PaymentIntent with the order amount and currency
@@ -52,14 +60,6 @@ export const charge = functions.https.onRequest(async (req, res) => {
     console.error(`Error creating payment intent: ${error}`)
     res.status(500).send('Invalid payment intent creation')
     return
-  }
-
-  try {
-    if (username != '' && customer_id != '') {
-      await stripe.paymentMethods.attach(payment_method, { customer: customer_id })
-    }
-  } catch (error) {
-    console.error(`Could not save Stripe customer payment method: ${error}`)
   }
 
   await db.collection('donations').doc().set({
