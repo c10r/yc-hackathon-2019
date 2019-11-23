@@ -21,7 +21,7 @@ export const calculateDonations = functions.https.onRequest(async (req, res) => 
 
 export const charge = functions.https.onRequest(async (req, res) => {
   const currency = 'USD'
-  const { amount, payment_method, url, username, message } = req.body
+  const { amount, payment_method, url, username, message, customer_id } = req.body
 
   // Required if we want to transfer part of the payment as a donation
   // A transfer group is a unique ID that lets you associate transfers with the original payment
@@ -41,6 +41,14 @@ export const charge = functions.https.onRequest(async (req, res) => {
       console.error(`Error creating payment intent: ${error}`)
       res.status(500).send('Invalid payment intent creation')
       return
+  }
+
+  try {
+    if (username != '' && customer_id != '') {
+      await stripe.paymentMethods.attach(payment_method, { customer: customer_id })
+    }
+  } catch (error) {
+    console.error(`Could not save Stripe customer payment method: ${error}`)
   }
 
   await db.collection('donations').doc().set({
