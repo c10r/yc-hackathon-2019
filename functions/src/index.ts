@@ -10,11 +10,11 @@ let db = admin.firestore()
 export const calculateDonations = functions.https.onRequest(async (req, res) => {
   const { url } = req.body
 
-  const docs = await db
+  const querySnapshot = await db
     .collection('donations')
     .where('url', '==', url)
     .get()
-  const data = docs.map((doc: any) => doc.data())
+  const data = querySnapshot.docs.map((doc: any) => doc.data())
   return res.status(200).json(data)
 })
 
