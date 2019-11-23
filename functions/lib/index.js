@@ -29,6 +29,7 @@ exports.charge = functions.https.onRequest(async (req, res) => {
             transfer_group,
             payment_method,
             confirm: true,
+            customer: customer_id == '' ? null : customer_id,
         });
     }
     catch (error) {
