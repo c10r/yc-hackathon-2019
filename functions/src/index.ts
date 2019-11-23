@@ -61,7 +61,8 @@ export const calculateDonations = functions.https.onRequest(async (req, res) => 
 
 export const charge = functions.https.onRequest(async (req, res) => {
   const currency = 'USD'
-  const { amount, payment_method, url, username, message, customer_id } = req.body
+  const { amount, url, username, message, customer_id } = req.body
+  let payment_method = req.body.payment_method
 
   const trimmedUrl = url.replace(/\/$/, "");
 
@@ -93,13 +94,21 @@ export const charge = functions.https.onRequest(async (req, res) => {
     var request:any = {
       amount,
       currency,
-      payment_method,
       confirm: true,
       metadata: {
         'url': trimmedUrl,
         'message': message,
       }
     }
+
+    if (!payment_method) {
+      // Need to pull it off the customer.
+      const paymentMethods = await stripe.paymentMethods.list(
+        {customer: customer_id, type: 'card'}
+      );
+      payment_method = paymentMethods.data[0].id
+    }
+    request.payment_method = payment_method
 
     if (customer_id) {
       request.customer = customer_id == '' ? null : customer_id
