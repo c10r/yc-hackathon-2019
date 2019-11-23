@@ -52,3 +52,41 @@ export const donate = functions.https.onRequest(async (req, res) => {
     donation_amount: 0.30,
   });
 })
+
+export const login = functions.https.onRequest(async (req, res) => {
+  const { username, password } = req.body
+  try {
+    const querySnapshot = await db.collection('users')
+      .where("username", "==", username)
+      .get();
+
+    if (querySnapshot.empty) {
+      const stripeCust = await stripe.customers.create({});
+
+      let docRef = db.collection('users').doc();
+      const user = {
+        username,
+        password,
+        stripe_customer: stripeCust.id,
+      };
+      docRef.set(user);
+
+      res.status(200).send(user);
+      return
+    }
+
+    const userRecord = querySnapshot.docs[0].data();
+
+    if (userRecord.password === password) {
+      // Login successful.
+      res.status(200).send(userRecord);
+    } else {
+      res.status(500).send('Invalid username/password');
+    }
+  } catch(error) {
+    // Handle Errors here.
+    console.error(`Error signing in user: ${error}`)
+    res.status(500).send('Error signing in user')
+    return
+  }
+})
