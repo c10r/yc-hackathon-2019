@@ -31,6 +31,31 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>CredZ</title>
+    <!-- Firebase SDK -->
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+      https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-analytics.js"></script>
+
+    <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyB9najuwXPdie8oVeEmtswbUCvJPqoLh-g",
+        authDomain: "credz-io.firebaseapp.com",
+        databaseURL: "https://credz-io.firebaseio.com",
+        projectId: "credz-io",
+        storageBucket: "credz-io.appspot.com",
+        messagingSenderId: "2399915251",
+        appId: "1:2399915251:web:37a1bc80f6594550e87b86",
+        measurementId: "G-CN2KBYDFT9"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      firebase.analytics();
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
