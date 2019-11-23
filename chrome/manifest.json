@@ -1,6 +1,6 @@
 {
   "name": "Credz.io Browser Extension",
-  "description": "Click browser action icon to give credit!",
+  "description": "Rewarding great ideas via microtransactions. Support content you love.",
   "version": "1.3",
   "browser_action": {
     "default_popup": "popup.html",
