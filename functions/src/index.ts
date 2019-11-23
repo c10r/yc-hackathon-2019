@@ -6,6 +6,9 @@ const stripe = require("stripe")("sk_test_XjjFP41NzYWM5KfH2MZzDnkU0075LBgZ2G")
 admin.initializeApp(functions.config().firebase)
 let db = admin.firestore()
 
+function getSum(total: any, num: any) {
+  return total + Math.round(num);
+}
 
 export const calculateDonations = functions.https.onRequest(async (req, res) => {
   const { url } = req.body
@@ -14,8 +17,10 @@ export const calculateDonations = functions.https.onRequest(async (req, res) => 
     .collection('donations')
     .where('url', '==', url)
     .get()
-  const data = querySnapshot.docs.map((doc: any) => doc.data())
-  return res.status(200).json(data)
+
+  const amounts = querySnapshot.docs.map((doc: any) => doc.data().amount)
+  const sum = amounts.reduce(getSum, 0)
+  return res.status(200).json({sum: sum})
 })
 
 
