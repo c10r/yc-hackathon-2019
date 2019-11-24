@@ -225,6 +225,7 @@ document.getElementById('signin-link').addEventListener('click', function() {
         console.log('Settings saved');
       });
     changeLoggedInState(false)
+    showCardInputForm(false)
   }
 })
 
