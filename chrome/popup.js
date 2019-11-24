@@ -160,7 +160,7 @@ var pay = async function(stripe, card) {
               "Content-Type": "application/json",
               "Access-Control-Allow-Origin": "*"
           },
-          body: JSON.stringify(GLOBAL_STATE.stripeCustomerId == '' ? {
+          body: JSON.stringify(payment_method ? {
               amount: amount*100,
               payment_method,
               url: GLOBAL_STATE.currentUrl,
