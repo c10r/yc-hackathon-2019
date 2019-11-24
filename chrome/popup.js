@@ -197,6 +197,9 @@ const orderComplete = function() {
   document.querySelectorAll(".completed-view").forEach(function(view) {
       view.classList.remove("hidden");
   });
+  document.querySelectorAll("#donations-view").forEach(function(view) {
+    view.classList.add("hidden");
+  });
 
   document.body.height = '300px';
 }
