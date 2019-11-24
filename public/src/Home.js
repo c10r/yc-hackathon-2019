@@ -41,9 +41,9 @@ class DonationList extends React.Component {
         const items = this.props.donations.map((donation, index) => {
             return (
                 <Card style={cardStyle}>
-                    <Card.Title>{donation.url}</Card.Title>
+                    <Card.Title><a href={donation.url}>{donation.url}</a></Card.Title>
                     <Card.Text style={cardTextStyle}>
-                        <p>🤑${donation.amount / 100.0}</p>
+                        <p>🤑${(donation.amount / 100.0).toFixed(2)}</p>
                         <p>{donation.message}</p>
                         <p style={cardSubtitleTextStyle}>{new String(donation.ts.toDate())}</p>
                     </Card.Text>
